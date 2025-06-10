@@ -15,15 +15,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/users/**").permitAll()  // ✅ Allow /users without login
                         .requestMatchers("/public").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(Customizer.withDefaults()) // modern, non-deprecated style
+                .oauth2Login(Customizer.withDefaults())
                 .oauth2ResourceServer(resource -> resource
                         .jwt(Customizer.withDefaults())
-                );
+                )
+                .csrf(csrf -> csrf.disable());  // Optional: disable CSRF for easier testing with Postman/curl
 
         return http.build();
     }
 }
-
