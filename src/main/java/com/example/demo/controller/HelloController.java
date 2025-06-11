@@ -25,7 +25,7 @@ public class HelloController {
                 "Email: " + user.getEmail() + "<br><br>" +
                 "ID Token:<br>" + user.getIdToken().getTokenValue();
     }
-    // ✅ Add this endpoint
+    //  Add this endpoint
     @GetMapping("/users/me")
     public String getCurrentUser(@AuthenticationPrincipal OidcUser user) {
         return "User Info:<br>" +
@@ -33,4 +33,5 @@ public class HelloController {
                 "Email: " + user.getEmail() + "<br>" +
                 "Username: " + user.getPreferredUsername();
     }
+
 }
