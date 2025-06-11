@@ -12,10 +12,11 @@ import lombok.Setter;
 @Table(name = "users")
 public class User {
     @Id
-    @NotBlank
-    private String id;
-    private String username;
 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String username;
+    private String email;
     private String password;
 
 //    @Enumerated(EnumType.STRING)

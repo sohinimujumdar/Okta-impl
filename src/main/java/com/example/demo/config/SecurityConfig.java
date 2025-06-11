@@ -15,7 +15,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/**").permitAll()  // ✅ Allow /users without login
+                        .requestMatchers("/users").permitAll()  
                         .requestMatchers("/public").permitAll()
                         .anyRequest().authenticated()
                 )

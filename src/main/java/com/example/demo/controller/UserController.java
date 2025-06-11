@@ -18,13 +18,19 @@ public class UserController {
     // 🔹 Create user
     @PostMapping
     public User createUser(@RequestBody User user) {
-        System.out.println("HI");
-        return userRepository.save(user);
+        try {
+            System.out.println("Received user: " + user);
+            return userRepository.save(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e; // optionally rethrow or return a meaningful error response
+        }
     }
 
     // 🔹 List all users
     @GetMapping
     public List<User> getUsers() {
+        System.out.println("HI get");
         return userRepository.findAll();
     }
 }

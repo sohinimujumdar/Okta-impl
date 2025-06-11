@@ -33,4 +33,15 @@ public class HelloController {
                 "Email: " + user.getEmail() + "<br>" +
                 "Username: " + user.getPreferredUsername();
     }
+
+    @GetMapping("/admin/hello")
+    public String adminHello() {
+        return "Hello ADMIN!";
+    }
+
+    @GetMapping("/user/hello")
+    public String userHello() {
+        return "Hello USER!";
+    }
+
 }
