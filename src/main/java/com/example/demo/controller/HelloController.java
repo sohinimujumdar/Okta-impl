@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HelloController {
 
-    @GetMapping("/")
+    @GetMapping("/welcome")
     public String home() {
         return "Welcome to the Spring Boot Okta JWT App!";
     }
@@ -33,15 +33,4 @@ public class HelloController {
                 "Email: " + user.getEmail() + "<br>" +
                 "Username: " + user.getPreferredUsername();
     }
-
-    @GetMapping("/admin/hello")
-    public String adminHello() {
-        return "Hello ADMIN!";
-    }
-
-    @GetMapping("/user/hello")
-    public String userHello() {
-        return "Hello USER!";
-    }
-
 }

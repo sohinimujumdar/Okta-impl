@@ -15,11 +15,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users").permitAll()  
+                        .requestMatchers("/users").permitAll()
                         .requestMatchers("/public").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(Customizer.withDefaults())
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler((request, response, authentication) -> {
+                            response.sendRedirect("/welcome");
+                        })
+                )
                 .oauth2ResourceServer(resource -> resource
                         .jwt(Customizer.withDefaults())
                 )
