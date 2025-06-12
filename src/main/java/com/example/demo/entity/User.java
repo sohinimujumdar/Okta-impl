@@ -1,8 +1,6 @@
 package com.example.demo.entity;
 
-
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,13 +17,6 @@ public class User {
     private String email;
     private String password;
 
-//    @Enumerated(EnumType.STRING)
-//    private Role role;
-
-//    public enum Role {
-//        ADMIN,
-//        USER
-//    }
 }
 
 

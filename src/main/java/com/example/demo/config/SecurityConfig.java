@@ -1,12 +1,15 @@
 package com.example.demo.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
+import com.example.demo.exceptions.JwtAuthEntryPoint;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -18,38 +21,57 @@ import java.util.stream.Collectors;
 @EnableWebSecurity
 public class SecurityConfig {
 
+
+
+    @Autowired
+    private JwtAuthEntryPoint jwtAuthEntryPoint;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users").permitAll()
-                        .requestMatchers("/public").permitAll()
-                        .requestMatchers("/debug").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/user/**").hasAnyAuthority("ROLE_USER")
+                        // Public endpoints
+                        .requestMatchers("/debug", "/public").permitAll()
+
+                        // GET /users → any authenticated user
+                        .requestMatchers(HttpMethod.GET, "/users").authenticated()
+
+                        // POST /users & DELETE /users/** → only admins
+                        .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+
+
+                        // Any other requests require authentication
                         .anyRequest().authenticated()
                 )
+
+                // Login success redirect for OAuth2 login (browser)
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler((request, response, authentication) -> {
                             response.sendRedirect("/welcome");
                         })
                 )
+
+                // JWT-based API authentication
                 .oauth2ResourceServer(resource -> resource
+                        .authenticationEntryPoint(jwtAuthEntryPoint) // 👈 Add this line
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
-                .csrf(csrf -> csrf.disable()); // Disable CSRF for testing via Postman, etc.
+
+                // Disable CSRF for tools like Postman
+                .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
 
-    // JWT converter to extract "groups" claim as Spring Security roles
+    // Convert 'groups' from JWT to ROLE_ authorities
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(jwt -> extractAuthorities(jwt));
+        converter.setJwtGrantedAuthoritiesConverter(this::extractAuthorities);
         return converter;
     }
 
-    // Extracts groups from JWT and maps them to ROLE_ authorities
+    // Extracts 'groups' claim and maps to ROLE_*
     private Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
         List<String> groups = jwt.getClaimAsStringList("groups");
         if (groups == null) return List.of();

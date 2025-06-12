@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Map;
 
 @RestController
 public class HelloController {
@@ -25,41 +27,53 @@ public class HelloController {
 
         System.out.println(">> /secure endpoint called");
 
-        OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
+        try {
+            if (authentication == null || authorizedClient == null) {
+                throw new RuntimeException("Authentication or authorized client is missing.");
+            }
 
-        String fullName = oidcUser.getFullName();
-        String email = oidcUser.getEmail();
-        String accessToken = authorizedClient.getAccessToken().getTokenValue();
-        String idToken = oidcUser.getIdToken().getTokenValue();
-        ZonedDateTime accessTokenExpiry = authorizedClient.getAccessToken().getExpiresAt()
-                .atZone(ZoneId.of("Asia/Kolkata"));
+            OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
 
-        // Console output for debugging
-        System.out.println("Authenticated user:");
-        System.out.println("  Full Name: " + fullName);
-        System.out.println("  Email: " + email);
-        System.out.println("  Access Token: " + accessToken);
-        System.out.println("  ID Token: " + idToken);
-        System.out.println("  Access Token Expiry (IST): " + accessTokenExpiry);
+            String fullName = oidcUser.getFullName();
+            String email = oidcUser.getEmail();
+            String accessToken = authorizedClient.getAccessToken().getTokenValue();
+            String idToken = oidcUser.getIdToken().getTokenValue();
+            ZonedDateTime accessTokenExpiry = authorizedClient.getAccessToken().getExpiresAt()
+                    .atZone(ZoneId.of("Asia/Kolkata"));
 
-        return """
+            return """
                 Hello, %s<br>
                 Email: %s<br><br>
-
                 <strong>Access Token:</strong><br>
                 %s<br><br>
-
                 <strong>ID Token:</strong><br>
                 %s<br><br>
-
                 <strong>Access Token Expires At (IST):</strong><br>
                 %s
-                """.formatted(
-                fullName,
-                email,
-                accessToken,
-                idToken,
-                accessTokenExpiry
-        );
+                """.formatted(fullName, email, accessToken, idToken, accessTokenExpiry);
+
+        } catch (ClassCastException e) {
+            throw new RuntimeException("Invalid user details in authentication token.");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to process secure endpoint: " + e.getMessage());
+        }
+    }
+
+    @RestController
+    public static class DebugController {
+
+        @GetMapping("/debug")
+        public Map<String, Object> debug(@AuthenticationPrincipal OidcUser oidcUser) {
+            if (oidcUser == null) {
+                return Map.of("error", "No OIDC user found. Are you logged in?");
+            }
+
+            return Map.of(
+                    "name", oidcUser.getFullName(),
+                    "email", oidcUser.getEmail(),
+                    "authorities", oidcUser.getAuthorities(),
+                    "claims", oidcUser.getClaims()
+            );
+        }
     }
 }
