@@ -21,8 +21,6 @@ import java.util.stream.Collectors;
 @EnableWebSecurity
 public class SecurityConfig {
 
-
-
     @Autowired
     private JwtAuthEntryPoint jwtAuthEntryPoint;
 
