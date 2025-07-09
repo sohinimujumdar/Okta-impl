@@ -34,7 +34,7 @@ public class SecurityConfig {
                         // GET /users → any authenticated user
                         .requestMatchers(HttpMethod.GET, "/users").authenticated()
 
-                        // POST /users & DELETE /users/** → only admins
+                        // POST /users & DELETE /users/**  only admins
                         .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
 
@@ -52,7 +52,7 @@ public class SecurityConfig {
 
                 // JWT-based API authentication
                 .oauth2ResourceServer(resource -> resource
-                        .authenticationEntryPoint(jwtAuthEntryPoint) // 👈 Add this line
+                        .authenticationEntryPoint(jwtAuthEntryPoint)
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
 
