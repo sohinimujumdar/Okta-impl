@@ -20,22 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @RestController
 public class HelloController {
-
-    private Map<String, Object> parseJwtPayload(String token) {
-        try {
-            String[] chunks = token.split("\\.");
-            Base64.Decoder decoder = Base64.getUrlDecoder();
-            String payload = new String(decoder.decode(chunks[1]));
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(payload, new TypeReference<Map<String, Object>>() {});
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse access token", e);
-        }
-    }
-
 
     @GetMapping("/welcome")
     public String home() {
