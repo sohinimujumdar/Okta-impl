@@ -28,8 +28,6 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers("/debug", "/public").permitAll()
 
                         // GET /users → any authenticated user
                         .requestMatchers(HttpMethod.GET, "/users").authenticated()
@@ -37,7 +35,6 @@ public class SecurityConfig {
                         // POST /users & DELETE /users/**  only admins
                         .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
-
 
                         // Any other requests require authentication
                         .anyRequest().authenticated()
@@ -49,6 +46,7 @@ public class SecurityConfig {
                             response.sendRedirect("/welcome");
                         })
                 )
+
 
                 // JWT-based API authentication
                 .oauth2ResourceServer(resource -> resource
